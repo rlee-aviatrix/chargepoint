@@ -1,0 +1,3 @@
+resource "aviatrix_controller_email_exception_notification_config" "controller_email_exception_notification_config_1" {
+}
+
