@@ -186,6 +186,14 @@ The maintenance window will be broken up into two phases:
 
 ### Migrate Spoke And Transit Gateways
 
+#### Prevalidation
+
+- From the Aviatrix Controller UI, go to Multi-Cloud Transit > List and switch to Spoke.
+- Select the spoke gateway and click on Details/Diag.
+- Go to VPC Route Table Details and click on the refresh icon.
+- For each route table, filter the Gateway field for `aviatrix`
+- Note the number of routes in each route table. This number is expected to be the same after migration.
+
 #### Detach Spokes From Transit On Old Controller
 
 - From the Aviatrix Controller UI, go to Multi-Cloud Transit > Setup > Attach/Detach, go to Detach Aviatrix Spoke Gateway, select the appropriate Spoke and Transit Gateways and click Detach.
@@ -233,9 +241,13 @@ resource "aviatrix_vgw_conn" "vgw_conn_3" {
 
 - Run `terraform apply`.
 
-#### Reattach VGW From Transit VPC
+#### Reattach VGW To Transit VPC
 
 - From the AWS Management Console, reattach the VGW to the transit VPC.
+
+#### Validation
+
+- Verify that the number of routes in the route tables matches the number from the prevalidation step.
 
 ### Egress Gateway Migration
 
