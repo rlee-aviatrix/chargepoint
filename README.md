@@ -52,7 +52,7 @@ There are three tasks that can be completed before the maintenance window:
 2. Preconfigure egress control settings
 3. Preconfigure stateful firewall settings
 
-### Deploy Spoke and Transit Gateways
+### Deploy Spoke And Transit Gateways
 
 The spoke and transit gateways can be deployed on the new Controller at any time. The egress gateways will need to be deployed during a maintenance window because we need to preserve the EIPs from the existing egress gateways.
 
@@ -115,7 +115,7 @@ resource "aviatrix_fqdn" "fqdn_1" {
 - `fqdn_tag_rule.tf` can be uncommented in its entirety.
 - Run `terraform apply`.
 
-#### Attach Gateway to Egress FQDN Filter
+#### Attach Gateway To Egress FQDN Filter
 
 - This step will be performed during the maintenance window. See the maintenance window section for more details.
 
@@ -133,7 +133,7 @@ Initially the code in these three files should be commented out. They will need 
 2. Uncomment `firewall.tf`. This step will be performed during the maintenance window.
 3. Uncomment `firewall_policy.tf`. This step will be performed during the maintenance window.
 
-#### firewall_tag.tf
+#### `firewall_tag.tf`
 
 - The firewall tags can be created before the maintenance window. Comment out or remove any lines that begin with `"$$hashKey"`.
 
@@ -169,11 +169,11 @@ resource "aviatrix_firewall_tag" "firewall_tag_1" {
 
 - Run `terraform apply`.
 
-#### firewall.tf
+#### `firewall.tf`
 
 - This step will be performed during the maintenance window. See the maintenance window section for more details.
 
-#### firewall_policy.tf
+#### `firewall_policy.tf`
 
 - This step will be performed during the maintenance window. See the maintenance window section for more details.
 
@@ -184,9 +184,9 @@ The maintenance window will be broken up into two phases:
 1. Migrate spoke and transit gateways.
 2. Migrate egress gateways.
 
-### Migrate Spoke and Transit Gateways
+### Migrate Spoke And Transit Gateways
 
-#### Detach Spokes from Transit on Old Controller
+#### Detach Spokes From Transit On Old Controller
 
 - From the Aviatrix Controller UI, go to Multi-Cloud Transit > Setup > Attach/Detach, go to Detach Aviatrix Spoke Gateway, select the appropriate Spoke and Transit Gateways and click Detach.
 
@@ -205,15 +205,15 @@ resource "aviatrix_spoke_transit_attachment" "spoke_transit_attachment_2" {
 
 - Run `terraform apply`.
 
-#### Remove VGW external connection on Old Controller
+#### Remove VGW External Connection Cn Old Controller
 
 - From the Aviatrix Controller UI, go to Multi-Cloud Transit > Setup > External Connection, go to Disconnect AWS VGW, select the appropriate VGW and click Detach.
 
-#### Detach VGW from transit VPC on Old Controller
+#### Detach VGW From Transit VPC On Old Controller
 
 - From the AWS Management Console, detach the VGW from the transit VPC.
 
-#### Add VGW external connection on New Controller
+#### Add VGW External Connection On New Controller
 
 - In `vgw_conn.tf`, uncomment the appropriate resource for the VGW attachment.
 
@@ -233,7 +233,7 @@ resource "aviatrix_vgw_conn" "vgw_conn_3" {
 
 - Run `terraform apply`.
 
-#### Reattach VGW from transit VPC
+#### Reattach VGW From Transit VPC
 
 - From the AWS Management Console, reattach the VGW to the transit VPC.
 
@@ -248,7 +248,7 @@ resource "aviatrix_vgw_conn" "vgw_conn_3" {
 
 - From the AWS Management Console, stop both egress gateway instances.
 
-#### Disassociate EIPs from Egress Gateways
+#### Disassociate EIPs From Egress Gateways
 
 - From the AWS Management Console, select the egress gateway instance, go to Actions > Networking > Disassociate Elastic IP address
 - Repeat this process for the HA gateway.
@@ -283,7 +283,7 @@ resource "aviatrix_gateway" "gateway_4" {
 
 - From the AWS Management Console, verify that the 0.0.0.0/0 route in the private route tables point to the ENIs of the new egress gateways.
 
-#### Attach Gateway to Egress FQDN Filter
+#### Attach Gateway To Egress FQDN Filter
 
 - Once the egress gateway has been deployed on the new Controller, we can attach the gateway to the Egress FQDN Filter. This can be accomplished by uncommenting the relevant `gw_filter_tag_list` entry. Here's an example `fqdn.txt` with `cp-prod-ore-pci-aviatrix-gw` attached to the filter:
 
@@ -312,7 +312,7 @@ resource "aviatrix_fqdn" "fqdn_1" {
 
 - Run `terraform apply`.
 
-#### firewall.tf
+#### `firewall.tf`
 
 - The resources in `firewall.tf` can be uncommented as the relevant gateways are deployed on the new Controller.
 
@@ -329,7 +329,7 @@ resource "aviatrix_firewall" "firewall_2" {
 
 - Run `terraform apply`.
 
-#### firewall_policy.tf
+#### `firewall_policy.tf`
 
 - The resources in `firewall_policy.tf` can be uncommented as the relevant gateways are deployed on the new Controller.
 
@@ -356,12 +356,12 @@ The rollback process will be the reverse of the migration process.
 
 ### Rollback Egress Gateway
 
-#### Remove Entries From firewall_policy.tf
+#### Remove Entries From `firewall_policy.tf`
 
 - Comment out resources that were uncommented in `firewall_policy.tf`.
 - Run `terraform apply`.
 
-#### Remove Entries From firewall.tf
+#### Remove Entries From `firewall.tf`
 
 - Comment out resources that were uncommented in `firewall.tf`.
 - Run `terraform apply`.
@@ -415,29 +415,29 @@ resource "aviatrix_fqdn" "fqdn_1" {
 
 - Validate default routes point to the ENI of the original egress gateway instances.
 
-### Rollback Spoke and Transit Gateways
+### Rollback Spoke And Transit Gateways
 
-#### Detach VGW from transit VPC
+#### Detach VGW From Transit VPC
 
 - From the AWS Management Console, detach the VGW to the transit VPC.
 
-#### Remove VGW External Connection on New Controller
+#### Remove VGW External Connection On New Controller
 
 - Comment out the appropriate resource in `vgw_conn.tf`.
 
-#### Detach Spokes from Transit on New Controller.
+#### Detach Spokes From Transit On New Controller.
 
 - Comment out the appropriate resource in `spoke_transit_attachment.tf`.
 
-#### Add VGW External Connection on Old Controller
+#### Add VGW External Connection On Old Controller
 
 - From the Aviatrix Controller UI, go to Multi-Cloud Transit > Setup > External Connections and re-add the VGW External Connection.
 
-#### Re-attach Spokes to Transit on Old Controller
+#### Re-attach Spokes To Transit On Old Controller
 
 - From the Aviatrix Controller UI, go to Multi-Cloud Transit > Setup > Attach/Detach, specify the appropriate spoke and transit gateways and click Attach.
 
-#### Attach VGW to Transit VPC
+#### Attach VGW To Transit VPC
 
 - From the AWS Management Console, attach the VGW to the transit VPC.
 
