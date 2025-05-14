@@ -255,7 +255,11 @@ resource "aviatrix_vgw_conn" "vgw_conn_3" {
 
 #### Deploy Egress Gateways
 
-- Egress FQDN gateways will need to be deployed during the maintenance window they will re-use EIPs used by the existing egress FQDN gateways. `eip` and `peering_ha_eip` should be specified in the `aviatrix_gateway` resources in `gateway.tf`. For example:
+- Egress FQDN gateways will need to be deployed during the maintenance window because they will re-use EIPs used by the existing egress FQDN gateways.
+- In the `aviatrix_gateway` resources in `gateway.tf`:
+  - `eip` and `peering_ha_eip` should be set set to the EIPs from the original egress gateways.
+  - `allocate_new_eip` should be set to `false`.
+  - `single_ip_snat` should be sest to `true`.
 
 ```
 resource "aviatrix_gateway" "gateway_4" {
@@ -397,6 +401,8 @@ resource "aviatrix_fqdn" "fqdn_1" {
 
 - Comment out the appropriate gateway in `gateway.tf`.
 - Run `terraform apply`.
+
+**Note:** Since these gateways were deployed with `allocate_new_eip = false`, it's not necessary to explicitly disassociate the EIPs. However, you may choose to do so as a precaution.
 
 #### Associate EIPs With Original Egress Gateways
 
