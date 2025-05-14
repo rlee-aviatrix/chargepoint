@@ -186,13 +186,26 @@ The maintenance window will be broken up into two phases:
 
 ### Migrate Spoke And Transit Gateways
 
-#### Prevalidation
+#### Pre-Migration Verification
+
+Capture the current configuration to ensure that settings remain unchanged after migration.
+
+##### Spoke Routes
 
 - From the Aviatrix Controller UI, go to Multi-Cloud Transit > List and switch to Spoke.
 - Select the spoke gateway and click on Details/Diag.
 - Go to VPC Route Table Details and click on the refresh icon.
-- For each route table, filter the Gateway field for `aviatrix`
-- Note the number of routes in each route table. This number is expected to be the same after migration.
+- For each route table:
+  - Filter the Gateway field for `aviatrix`.
+  - Record the number of routes. This count should remain the same after migration.
+
+##### VGW Settings
+
+- From the AWS Management Console, find all route tables for the transit VPC.
+- For each route table:
+  - Check for static routes pointing to VGW.
+  - Check for the route propagation setting for the VGW (whether Yes or No).
+  - Record the settings. They should remain the same after the migration.
 
 #### Detach Spokes From Transit On Old Controller
 
@@ -245,9 +258,13 @@ resource "aviatrix_vgw_conn" "vgw_conn_3" {
 
 - From the AWS Management Console, reattach the VGW to the transit VPC.
 
-#### Validation
+#### Post-Migration Verification
 
-- Verify that the number of routes in the route tables matches the number from the prevalidation step.
+Confirm that the settings captured during the pre-migration verification are unchanged.
+
+- Verify that there are the same number of routes pointing to the Aviatrix gateways.
+- Verify that the static routes pointing to the VGW are unchanged.
+- Verify that the route propagation setting for the VGW is unchanged.
 
 ### Egress Gateway Migration
 
