@@ -54,7 +54,7 @@ This document outlines the recommended process for migrating an existing Aviatri
       - [Add VGW External Connection On Old Controller](#add-vgw-external-connection-on-old-controller)
       - [Re-attach Spokes To Transit On Old Controller](#re-attach-spokes-to-transit-on-old-controller)
       - [Attach VGW To Transit VPC](#attach-vgw-to-transit-vpc)
-      - [Unused Resources](#unused-resources)
+      - [Delete Unused Resources](#delete-unused-resources)
 
 ## Deploy 7.2 Controller
 
@@ -531,6 +531,6 @@ resource "aviatrix_fqdn" "fqdn_1" {
 
 - From the AWS Management Console, attach the VGW to the transit VPC.
 
-#### Unused Resources
+#### Delete Unused Resources
 
-- The remaining unused resources deployed on the new Controller such as spoke and transit gateway instances can be deleted once the rollback is complete.
+- The remaining unused resources can be deleted by commenting out the appropriate Terraform resources.
