@@ -501,7 +501,7 @@ resource "aviatrix_fqdn" "fqdn_1" {
 
 #### Validate Default Routes
 
-- Validate default routes point to the ENI of the original egress gateway instances.
+- From the AWS Management Console, validate that default routes point to the ENI of the original egress gateway instances.
 
 ### Rollback Spoke And Transit Gateways
 
@@ -511,11 +511,13 @@ resource "aviatrix_fqdn" "fqdn_1" {
 
 #### Remove VGW External Connection On New Controller
 
-- Comment out the appropriate resource in `vgw_conn.tf`.
+- Comment out the appropriate VGW connection in `vgw_conn.tf`.
+- Run `terraform apply`.
 
 #### Detach Spokes From Transit On New Controller
 
-- Comment out the appropriate resource in `spoke_transit_attachment.tf`.
+- Comment out the appropriate spoke transit attachment `spoke_transit_attachment.tf`.
+- Run `terraform apply`.
 
 #### Add VGW External Connection On Old Controller
 
