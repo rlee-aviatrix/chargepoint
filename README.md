@@ -33,7 +33,6 @@ This document outlines the recommended process for migrating an existing Aviatri
       - [Stop Egress Gateway Instances](#stop-egress-gateway-instances)
       - [Disassociate EIPs From Egress Gateways](#disassociate-eips-from-egress-gateways)
       - [Deploy Egress Gateways](#deploy-egress-gateways)
-      - [Validate Default Routes](#validate-default-routes)
       - [Attach Gateway To Egress FQDN Filter](#attach-gateway-to-egress-fqdn-filter-1)
       - [Update `firewall.tf`](#update-firewalltf-1)
       - [Update `firewall_policy.tf`](#update-firewall_policytf-1)
@@ -47,7 +46,7 @@ This document outlines the recommended process for migrating an existing Aviatri
       - [Associate EIPs With Original Egress Gateways](#associate-eips-with-original-egress-gateways)
       - [Start Original Egress Gateways](#start-original-egress-gateways)
       - [Re-enable Gateway Single AZ HA](#re-enable-gateway-single-az-ha)
-      - [Validate Default Routes](#validate-default-routes-1)
+      - [Validate Default Routes](#validate-default-routes)
     - [Rollback Spoke And Transit Gateways](#rollback-spoke-and-transit-gateways)
       - [Detach VGW From Transit VPC](#detach-vgw-from-transit-vpc)
       - [Remove VGW External Connection On New Controller](#remove-vgw-external-connection-on-new-controller)
@@ -257,7 +256,7 @@ Capture the current configuration to ensure that settings remain unchanged after
 - From the AWS Management Console, find all route tables for the transit VPC.
 - For each route table:
   - Check for static routes pointing to VGW.
-  - Check for the route propagation setting for the VGW (whether Yes or No).
+  - Check the route propagation setting for the VGW (whether Yes or No).
   - Record the settings. They should remain the same after the migration.
 
 #### Detach Spokes From Transit On Old Controller
@@ -365,10 +364,6 @@ resource "aviatrix_gateway" "gateway_4" {
 
 - Run `terraform apply`.
 
-#### Validate Default Routes
-
-- From the AWS Management Console, verify that the 0.0.0.0/0 route in the private route tables point to the ENIs of the new egress gateways.
-
 #### Attach Gateway To Egress FQDN Filter
 
 - Once the egress gateway has been deployed on the new Controller, we can attach the gateway to the Egress FQDN Filter. This can be accomplished by uncommenting the relevant `gw_filter_tag_list` entry. Here's an example `fqdn.txt` with `cp-prod-ore-pci-aviatrix-gw` attached to the filter:
@@ -438,6 +433,7 @@ resource "aviatrix_firewall_policy" "firewall_policy_3" {
 
 #### Validation
 
+- From the AWS Management Console, verify that the 0.0.0.0/0 route in the private route tables point to the ENIs of the new egress gateways.
 - From an instance within the VPC, validate that traffic is correctly allowed or denied based on egress FQDN filters and stateful firewall policies.
 
 ## Rollback
