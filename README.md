@@ -4,6 +4,59 @@ This document outlines the recommended process for migrating an existing Aviatri
 
 **Note:** Throughout this document, the existing 6.5 Controller will be referred to as the "old" Controller and the 7.2 Controller will be referred to as the "new" Controller.
 
+- [ChargePoint Migration Process](#chargepoint-migration-process)
+  - [Deploy 7.2 Controller](#deploy-72-controller)
+  - [Staging Activities](#staging-activities)
+    - [Deploy Spoke And Transit Gateways](#deploy-spoke-and-transit-gateways)
+    - [Preconfigure Egress Control Settings](#preconfigure-egress-control-settings)
+      - [Update `fqdn.tf`](#update-fqdntf)
+      - [Update `fqdn_tag_rule.tf`](#update-fqdn_tag_ruletf)
+      - [Attach Gateway To Egress FQDN Filter](#attach-gateway-to-egress-fqdn-filter)
+    - [Preconfigure Stateful Firewall](#preconfigure-stateful-firewall)
+      - [Update `firewall_tag.tf`](#update-firewall_tagtf)
+      - [Update `firewall.tf`](#update-firewalltf)
+      - [Update `firewall_policy.tf`](#update-firewall_policytf)
+  - [Maintenance Window Activities](#maintenance-window-activities)
+    - [Migrate Spoke And Transit Gateways](#migrate-spoke-and-transit-gateways)
+      - [Pre-Migration Verification](#pre-migration-verification)
+        - [Spoke Routes](#spoke-routes)
+        - [VGW Settings](#vgw-settings)
+      - [Detach Spokes From Transit On Old Controller](#detach-spokes-from-transit-on-old-controller)
+      - [Attach Spokes To Transit On New Controller](#attach-spokes-to-transit-on-new-controller)
+      - [Remove VGW External Connection On Old Controller](#remove-vgw-external-connection-on-old-controller)
+      - [Detach VGW From Transit VPC On Old Controller](#detach-vgw-from-transit-vpc-on-old-controller)
+      - [Add VGW External Connection On New Controller](#add-vgw-external-connection-on-new-controller)
+      - [Reattach VGW To Transit VPC](#reattach-vgw-to-transit-vpc)
+      - [Post-Migration Verification](#post-migration-verification)
+    - [Egress Gateway Migration](#egress-gateway-migration)
+      - [Disable Gateway Single AZ HA](#disable-gateway-single-az-ha)
+      - [Stop Egress Gateway Instances](#stop-egress-gateway-instances)
+      - [Disassociate EIPs From Egress Gateways](#disassociate-eips-from-egress-gateways)
+      - [Deploy Egress Gateways](#deploy-egress-gateways)
+      - [Validate Default Routes](#validate-default-routes)
+      - [Attach Gateway To Egress FQDN Filter](#attach-gateway-to-egress-fqdn-filter-1)
+      - [Update `firewall.tf`](#update-firewalltf-1)
+      - [Update `firewall_policy.tf`](#update-firewall_policytf-1)
+      - [Validation](#validation)
+  - [Rollback](#rollback)
+    - [Rollback Egress Gateway](#rollback-egress-gateway)
+      - [Remove Entries From `firewall_policy.tf`](#remove-entries-from-firewall_policytf)
+      - [Remove Entries From `firewall.tf`](#remove-entries-from-firewalltf)
+      - [Detach Gateway From Egress FQDN Filter](#detach-gateway-from-egress-fqdn-filter)
+      - [Delete New Egress Gateway](#delete-new-egress-gateway)
+      - [Associate EIPs With Original Egress Gateways](#associate-eips-with-original-egress-gateways)
+      - [Start Original Egress Gateways](#start-original-egress-gateways)
+      - [Re-enable Gateway Single AZ HA](#re-enable-gateway-single-az-ha)
+      - [Validate Default Routes](#validate-default-routes-1)
+    - [Rollback Spoke And Transit Gateways](#rollback-spoke-and-transit-gateways)
+      - [Detach VGW From Transit VPC](#detach-vgw-from-transit-vpc)
+      - [Remove VGW External Connection On New Controller](#remove-vgw-external-connection-on-new-controller)
+      - [Detach Spokes From Transit On New Controller](#detach-spokes-from-transit-on-new-controller)
+      - [Add VGW External Connection On Old Controller](#add-vgw-external-connection-on-old-controller)
+      - [Re-attach Spokes To Transit On Old Controller](#re-attach-spokes-to-transit-on-old-controller)
+      - [Attach VGW To Transit VPC](#attach-vgw-to-transit-vpc)
+      - [Unused Resources](#unused-resources)
+
 ## Deploy 7.2 Controller
 
 We will use the following code to deploy an Aviatrix Controller running 7.2 along with Aviatrix CoPilot:
@@ -83,7 +136,7 @@ Initially the code in these two files should be commented out. They will need to
 2. Uncomment `fqdn_tag_rule.tf`.
 3. Attach the gateway to the Egress FQDN filter. This step will be performed during the maintenance window.
 
-#### `fqdn.tf`
+#### Update `fqdn.tf`
 
 - We will create the Egress FQDN filter but not apply it to any gateways. This can be accomplished by leaving the `gw_filter_tag_list` entries commented out. Example `fqdn.tf`:
 
@@ -110,7 +163,7 @@ resource "aviatrix_fqdn" "fqdn_1" {
 
 - Run `terraform apply`.
 
-#### `fqdn_tag_rule.tf`
+#### Update `fqdn_tag_rule.tf`
 
 - `fqdn_tag_rule.tf` can be uncommented in its entirety.
 - Run `terraform apply`.
@@ -133,7 +186,7 @@ Initially the code in these three files should be commented out. They will need 
 2. Uncomment `firewall.tf`. This step will be performed during the maintenance window.
 3. Uncomment `firewall_policy.tf`. This step will be performed during the maintenance window.
 
-#### `firewall_tag.tf`
+#### Update `firewall_tag.tf`
 
 - The firewall tags can be created before the maintenance window. Comment out or remove any lines that begin with `"$$hashKey"`.
 
@@ -169,11 +222,11 @@ resource "aviatrix_firewall_tag" "firewall_tag_1" {
 
 - Run `terraform apply`.
 
-#### `firewall.tf`
+#### Update `firewall.tf`
 
 - This step will be performed during the maintenance window. See the maintenance window section for more details.
 
-#### `firewall_policy.tf`
+#### Update `firewall_policy.tf`
 
 - This step will be performed during the maintenance window. See the maintenance window section for more details.
 
@@ -211,7 +264,7 @@ Capture the current configuration to ensure that settings remain unchanged after
 
 - From the Aviatrix Controller UI, go to Multi-Cloud Transit > Setup > Attach/Detach, go to Detach Aviatrix Spoke Gateway, select the appropriate Spoke and Transit Gateways and click Detach.
 
-#### Attach Spokes to Transit On New Controller
+#### Attach Spokes To Transit On New Controller
 
 - In `spoke_transit_attachment.tf`, uncomment the appropriate resources to attach the spoke to the transit.
 
@@ -226,7 +279,7 @@ resource "aviatrix_spoke_transit_attachment" "spoke_transit_attachment_2" {
 
 - Run `terraform apply`.
 
-#### Remove VGW External Connection Cn Old Controller
+#### Remove VGW External Connection On Old Controller
 
 - From the Aviatrix Controller UI, go to Multi-Cloud Transit > Setup > External Connection, go to Disconnect AWS VGW, select the appropriate VGW and click Detach.
 
@@ -345,7 +398,7 @@ resource "aviatrix_fqdn" "fqdn_1" {
 
 - Run `terraform apply`.
 
-#### `firewall.tf`
+#### Update `firewall.tf`
 
 - The resources in `firewall.tf` can be uncommented as the relevant gateways are deployed on the new Controller.
 
@@ -362,7 +415,7 @@ resource "aviatrix_firewall" "firewall_2" {
 
 - Run `terraform apply`.
 
-#### `firewall_policy.tf`
+#### Update `firewall_policy.tf`
 
 - The resources in `firewall_policy.tf` can be uncommented as the relevant gateways are deployed on the new Controller.
 
@@ -464,7 +517,7 @@ resource "aviatrix_fqdn" "fqdn_1" {
 
 - Comment out the appropriate resource in `vgw_conn.tf`.
 
-#### Detach Spokes From Transit On New Controller.
+#### Detach Spokes From Transit On New Controller
 
 - Comment out the appropriate resource in `spoke_transit_attachment.tf`.
 
