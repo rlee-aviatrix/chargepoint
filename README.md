@@ -340,7 +340,7 @@ Confirm that the settings captured during the pre-migration verification are unc
 - In the `aviatrix_gateway` resources in `gateway.tf`:
   - `eip` and `peering_ha_eip` should be set set to the EIPs from the original egress gateways.
   - `allocate_new_eip` should be set to `false`.
-  - `single_ip_snat` should be sest to `true`.
+  - `single_ip_snat` should be set to `true`.
 
 ```
 resource "aviatrix_gateway" "gateway_4" {
@@ -366,7 +366,7 @@ resource "aviatrix_gateway" "gateway_4" {
 
 #### Attach Gateway To Egress FQDN Filter
 
-- Once the egress gateway has been deployed on the new Controller, we can attach the gateway to the Egress FQDN Filter. This can be accomplished by uncommenting the relevant `gw_filter_tag_list` entry. Here's an example `fqdn.txt` with `cp-prod-ore-pci-aviatrix-gw` attached to the filter:
+- Once the egress gateway has been deployed on the new Controller, we can attach the gateway to the Egress FQDN Filter. This can be accomplished by uncommenting the relevant `gw_filter_tag_list` entry. Here's an example `fqdn.tf` with `cp-prod-ore-pci-aviatrix-gw` attached to the filter:
 
 ```
 resource "aviatrix_fqdn" "fqdn_1" {
