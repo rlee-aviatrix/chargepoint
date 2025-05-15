@@ -383,6 +383,10 @@ resource "aviatrix_firewall_policy" "firewall_policy_3" {
 
 - Run `terraform apply`.
 
+#### Validation
+
+- From an instance within the VPC, validate that traffic is correctly allowed or denied based on egress FQDN filters and stateful firewall policies.
+
 ## Rollback
 
 The rollback process will be the reverse of the migration process.
