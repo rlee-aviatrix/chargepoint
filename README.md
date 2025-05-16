@@ -27,6 +27,7 @@ This document outlines the recommended process for migrating an existing Aviatri
       - [Detach VGW From Transit VPC On Old Controller](#detach-vgw-from-transit-vpc-on-old-controller)
       - [Add VGW External Connection On New Controller](#add-vgw-external-connection-on-new-controller)
       - [Reattach VGW To Transit VPC](#reattach-vgw-to-transit-vpc)
+      - [Update VGW Route Propgation Settings](#update-vgw-route-propgation-settings)
       - [Post-Migration Verification](#post-migration-verification)
     - [Egress Gateway Migration](#egress-gateway-migration)
       - [Disable Gateway Single AZ HA](#disable-gateway-single-az-ha)
@@ -256,8 +257,9 @@ Capture the current configuration to ensure that settings remain unchanged after
 - From the AWS Management Console, find all route tables for the transit VPC.
 - For each route table:
   - Check for static routes pointing to VGW.
-  - Check the route propagation setting for the VGW (whether Yes or No).
-  - Record the settings. They should remain the same after the migration.
+    - Record these routes. They should remain unchanged after the migration.
+  - Check the VGW route propagation setting and note any route tables where it is set to Yes
+    - After detaching and reattaching the VGW, VGW route propagation will be set to No. You will need to manually set it back to Yes if required.
 
 #### Detach Spokes From Transit On Old Controller
 
@@ -310,13 +312,16 @@ resource "aviatrix_vgw_conn" "vgw_conn_3" {
 
 - From the AWS Management Console, reattach the VGW to the transit VPC.
 
+#### Update VGW Route Propgation Settings
+
+- After detaching and reattaching the VGW, VGW route propagation will be set to No. From the AWS Management Console, re-enable route propagation by setting it back to Yes for any route tables that previously had it enabled.
+
 #### Post-Migration Verification
 
 Confirm that the settings captured during the pre-migration verification are unchanged.
 
 - Verify that there are the same number of routes pointing to the Aviatrix gateways.
-- Verify that the static routes pointing to the VGW are unchanged.
-- Verify that the route propagation setting for the VGW is unchanged.
+- Verify that the static routes pointing to the VGW are unchanged and not blackholed.
 
 ### Egress Gateway Migration
 
