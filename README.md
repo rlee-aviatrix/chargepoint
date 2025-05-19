@@ -8,14 +8,14 @@ This document outlines the recommended process for migrating an existing Aviatri
   - [Deploy 7.2 Controller](#deploy-72-controller)
   - [Staging Activities](#staging-activities)
     - [Deploy Spoke And Transit Gateways](#deploy-spoke-and-transit-gateways)
-    - [Preconfigure Egress Control Settings](#preconfigure-egress-control-settings)
-      - [Update `fqdn.tf`](#update-fqdntf)
-      - [Update `fqdn_tag_rule.tf`](#update-fqdn_tag_ruletf)
-      - [Attach Gateway To Egress FQDN Filter](#attach-gateway-to-egress-fqdn-filter)
     - [Preconfigure Stateful Firewall](#preconfigure-stateful-firewall)
       - [Update `firewall_tag.tf`](#update-firewall_tagtf)
       - [Update `firewall.tf`](#update-firewalltf)
       - [Update `firewall_policy.tf`](#update-firewall_policytf)
+    - [Preconfigure Egress Control Settings](#preconfigure-egress-control-settings)
+      - [Update `fqdn.tf`](#update-fqdntf)
+      - [Update `fqdn_tag_rule.tf`](#update-fqdn_tag_ruletf)
+      - [Attach Gateway To Egress FQDN Filter](#attach-gateway-to-egress-fqdn-filter)
   - [Maintenance Window Activities](#maintenance-window-activities)
     - [Migrate Spoke And Transit Gateways](#migrate-spoke-and-transit-gateways)
       - [Pre-Migration Verification](#pre-migration-verification)
@@ -34,15 +34,15 @@ This document outlines the recommended process for migrating an existing Aviatri
       - [Stop Egress Gateway Instances](#stop-egress-gateway-instances)
       - [Disassociate EIPs From Egress Gateways](#disassociate-eips-from-egress-gateways)
       - [Deploy Egress Gateways](#deploy-egress-gateways)
-      - [Attach Gateway To Egress FQDN Filter](#attach-gateway-to-egress-fqdn-filter-1)
-      - [Update `firewall.tf`](#update-firewalltf-1)
       - [Update `firewall_policy.tf`](#update-firewall_policytf-1)
+      - [Update `firewall.tf`](#update-firewalltf-1)
+      - [Attach Gateway To Egress FQDN Filter](#attach-gateway-to-egress-fqdn-filter-1)
       - [Validation](#validation)
   - [Rollback](#rollback)
     - [Rollback Egress Gateway](#rollback-egress-gateway)
-      - [Remove Entries From `firewall_policy.tf`](#remove-entries-from-firewall_policytf)
-      - [Remove Entries From `firewall.tf`](#remove-entries-from-firewalltf)
       - [Detach Gateway From Egress FQDN Filter](#detach-gateway-from-egress-fqdn-filter)
+      - [Remove Entries From `firewall.tf`](#remove-entries-from-firewalltf)
+      - [Remove Entries From `firewall_policy.tf`](#remove-entries-from-firewall_policytf)
       - [Delete New Egress Gateway](#delete-new-egress-gateway)
       - [Associate EIPs With Original Egress Gateways](#associate-eips-with-original-egress-gateways)
       - [Start Original Egress Gateways](#start-original-egress-gateways)
@@ -103,8 +103,8 @@ output "controlplane_data" {
 There are three tasks that can be completed before the maintenance window:
 
 1. Deploy spoke and transit gateways
-2. Preconfigure egress control settings
-3. Preconfigure stateful firewall settings
+2. Preconfigure stateful firewall settings
+3. Preconfigure egress control settings
 
 ### Deploy Spoke And Transit Gateways
 
@@ -123,55 +123,6 @@ There are minor code changes required:
   - `manage_transit_gateway_attachment`
 
 Run `terraform apply`.
-
-### Preconfigure Egress Control Settings
-
-Egress Control is defined by the following files:
-
-- `fqdn_tag_rule.tf`
-- `fqdn.tf`
-
-Initially the code in these two files should be commented out. They will need to be uncommented and applied in a specific order to avoid dependency issues during the `terraform apply`. The required order is:
-
-1. Uncomment `fqdn.tf`. See below for required updates.
-2. Uncomment `fqdn_tag_rule.tf`.
-3. Attach the gateway to the Egress FQDN filter. This step will be performed during the maintenance window.
-
-#### Update `fqdn.tf`
-
-- We will create the Egress FQDN filter but not apply it to any gateways. This can be accomplished by leaving the `gw_filter_tag_list` entries commented out. Example `fqdn.tf`:
-
-```
-resource "aviatrix_fqdn" "fqdn_1" {
-    fqdn_mode = "white"
-    fqdn_enabled = true
-    # gw_filter_tag_list {
-    #     gw_name = "cp-prod-mon-pci-aviatrix-egress-gw"
-    # }
-
-    # gw_filter_tag_list {
-    #     gw_name = "cp-prod-fra-pci-aviatrix-egress-gw"
-    # }
-
-    # gw_filter_tag_list {
-    #     gw_name = "cp-prod-ore-pci-aviatrix-gw"
-    # }
-
-    fqdn_tag = "Payment-VPC-OutBound-Web-Whitelist"
-    manage_domain_names = false
-}
-```
-
-- Run `terraform apply`.
-
-#### Update `fqdn_tag_rule.tf`
-
-- `fqdn_tag_rule.tf` can be uncommented in its entirety.
-- Run `terraform apply`.
-
-#### Attach Gateway To Egress FQDN Filter
-
-- This step will be performed during the maintenance window. See the maintenance window section for more details.
 
 ### Preconfigure Stateful Firewall
 
@@ -228,6 +179,55 @@ resource "aviatrix_firewall_tag" "firewall_tag_1" {
 - This step will be performed during the maintenance window. See the maintenance window section for more details.
 
 #### Update `firewall_policy.tf`
+
+- This step will be performed during the maintenance window. See the maintenance window section for more details.
+
+### Preconfigure Egress Control Settings
+
+Egress Control is defined by the following files:
+
+- `fqdn_tag_rule.tf`
+- `fqdn.tf`
+
+Initially the code in these two files should be commented out. They will need to be uncommented and applied in a specific order to avoid dependency issues during the `terraform apply`. The required order is:
+
+1. Uncomment `fqdn.tf`. See below for required updates.
+2. Uncomment `fqdn_tag_rule.tf`.
+3. Attach the gateway to the Egress FQDN filter. This step will be performed during the maintenance window.
+
+#### Update `fqdn.tf`
+
+- We will create the Egress FQDN filter but not apply it to any gateways. This can be accomplished by leaving the `gw_filter_tag_list` entries commented out. Example `fqdn.tf`:
+
+```
+resource "aviatrix_fqdn" "fqdn_1" {
+    fqdn_mode = "white"
+    fqdn_enabled = true
+    # gw_filter_tag_list {
+    #     gw_name = "cp-prod-mon-pci-aviatrix-egress-gw"
+    # }
+
+    # gw_filter_tag_list {
+    #     gw_name = "cp-prod-fra-pci-aviatrix-egress-gw"
+    # }
+
+    # gw_filter_tag_list {
+    #     gw_name = "cp-prod-ore-pci-aviatrix-gw"
+    # }
+
+    fqdn_tag = "Payment-VPC-OutBound-Web-Whitelist"
+    manage_domain_names = false
+}
+```
+
+- Run `terraform apply`.
+
+#### Update `fqdn_tag_rule.tf`
+
+- `fqdn_tag_rule.tf` can be uncommented in its entirety.
+- Run `terraform apply`.
+
+#### Attach Gateway To Egress FQDN Filter
 
 - This step will be performed during the maintenance window. See the maintenance window section for more details.
 
@@ -377,6 +377,44 @@ resource "aviatrix_gateway" "gateway_4" {
 
 - Run `terraform apply`.
 
+#### Update `firewall_policy.tf`
+
+- The resources in `firewall_policy.tf` can be uncommented as the relevant gateways are deployed on the new Controller.
+
+```
+resource "aviatrix_firewall_policy" "firewall_policy_3" {
+    gw_name = "cp-prod-ore-pci-aviatrix-gw"
+    src_ip = "172.20.122.53"
+    dst_ip = "Alertlogic-Outbound-Traffic"
+    protocol = "tcp"
+    port = "4138"
+    action = "allow"
+    log_enabled = false
+    description = "Event transport"
+}
+```
+
+**Note:** The gateway names will need to be updated to the new names.
+
+- Run `terraform apply`.
+
+#### Update `firewall.tf`
+
+- The resources in `firewall.tf` can be uncommented as the relevant gateways are deployed on the new Controller.
+
+```
+resource "aviatrix_firewall" "firewall_2" {
+    base_policy = "deny-all"
+    base_log_enabled = false
+    manage_firewall_policies = false
+    gw_name = "cp-prod-ore-pci-aviatrix-gw"
+}
+```
+
+**Note:** The gateway names will need to be updated to the new names.
+
+- Run `terraform apply`.
+
 #### Attach Gateway To Egress FQDN Filter
 
 - Once the egress gateway has been deployed on the new Controller, we can attach the gateway to the Egress FQDN Filter. This can be accomplished by uncommenting the relevant `gw_filter_tag_list` entry. Here's an example `fqdn.tf` with `cp-prod-ore-pci-aviatrix-gw` attached to the filter:
@@ -406,44 +444,6 @@ resource "aviatrix_fqdn" "fqdn_1" {
 
 - Run `terraform apply`.
 
-#### Update `firewall.tf`
-
-- The resources in `firewall.tf` can be uncommented as the relevant gateways are deployed on the new Controller.
-
-```
-resource "aviatrix_firewall" "firewall_2" {
-    base_policy = "deny-all"
-    base_log_enabled = false
-    manage_firewall_policies = false
-    gw_name = "cp-prod-ore-pci-aviatrix-gw"
-}
-```
-
-**Note:** The gateway names will need to be updated to the new names.
-
-- Run `terraform apply`.
-
-#### Update `firewall_policy.tf`
-
-- The resources in `firewall_policy.tf` can be uncommented as the relevant gateways are deployed on the new Controller.
-
-```
-resource "aviatrix_firewall_policy" "firewall_policy_3" {
-    gw_name = "cp-prod-ore-pci-aviatrix-gw"
-    src_ip = "172.20.122.53"
-    dst_ip = "Alertlogic-Outbound-Traffic"
-    protocol = "tcp"
-    port = "4138"
-    action = "allow"
-    log_enabled = false
-    description = "Event transport"
-}
-```
-
-**Note:** The gateway names will need to be updated to the new names.
-
-- Run `terraform apply`.
-
 #### Validation
 
 - From the AWS Management Console, verify that the 0.0.0.0/0 route in the private route tables point to the ENIs of the new egress gateways.
@@ -454,16 +454,6 @@ resource "aviatrix_firewall_policy" "firewall_policy_3" {
 The rollback process will be the reverse of the migration process.
 
 ### Rollback Egress Gateway
-
-#### Remove Entries From `firewall_policy.tf`
-
-- Comment out resources that were uncommented in `firewall_policy.tf`.
-- Run `terraform apply`.
-
-#### Remove Entries From `firewall.tf`
-
-- Comment out resources that were uncommented in `firewall.tf`.
-- Run `terraform apply`.
 
 #### Detach Gateway From Egress FQDN Filter
 
@@ -490,6 +480,16 @@ resource "aviatrix_fqdn" "fqdn_1" {
 }
 ```
 
+- Run `terraform apply`.
+
+#### Remove Entries From `firewall.tf`
+
+- Comment out resources that were uncommented in `firewall.tf`.
+- Run `terraform apply`.
+
+#### Remove Entries From `firewall_policy.tf`
+
+- Comment out resources that were uncommented in `firewall_policy.tf`.
 - Run `terraform apply`.
 
 #### Delete New Egress Gateway
