@@ -346,6 +346,7 @@ Confirm that the settings captured during the pre-migration verification are unc
   - `eip` and `peering_ha_eip` should be set set to the EIPs from the original egress gateways.
   - `allocate_new_eip` should be set to `false`.
   - `single_ip_snat` should be set to `true`.
+  - `enable_vpc_dns_server` should be set to `false` and `lifecycle { ignore_changes = [enable_vpc_dns_server] }` should be added to the resource. See [note](https://registry.terraform.io/providers/AviatrixSystems/aviatrix/latest/docs/resources/aviatrix_fqdn#enable_vpc_dns_server) and [KB article](https://aviatrix.zendesk.com/hc/en-us/articles/16899320452493-How-to-fix-Terraform-errors-when-it-fails-to-disable-VPC-DNS-Server?input_string=fqdn+filtering+is+not+working+as+w).
 
 ```
 resource "aviatrix_gateway" "gateway_4" {
@@ -356,7 +357,7 @@ resource "aviatrix_gateway" "gateway_4" {
     vpc_reg = "us-west-2"
     gw_size = "t2.medium"
     eip = "54.245.17.152"
-    enable_vpc_dns_server = true
+    enable_vpc_dns_server = false
     account_name = "cp-prod-pci"
     single_ip_snat = true
     subnet = "172.20.122.128/26"
@@ -364,6 +365,12 @@ resource "aviatrix_gateway" "gateway_4" {
     peering_ha_subnet = "172.20.122.192/26"
     peering_ha_gw_size = "t2.medium"
     peering_ha_eip = "x.x.x.x"
+
+    lifecycle {
+      ignore_changes = [
+        enable_vpc_dns_server
+      ]
+    }
 }
 ```
 
