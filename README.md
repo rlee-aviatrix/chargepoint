@@ -53,8 +53,9 @@ This document outlines the recommended process for migrating an existing Aviatri
       - [Remove VGW External Connection On New Controller](#remove-vgw-external-connection-on-new-controller)
       - [Detach Spokes From Transit On New Controller](#detach-spokes-from-transit-on-new-controller)
       - [Add VGW External Connection On Old Controller](#add-vgw-external-connection-on-old-controller)
-      - [Re-attach Spokes To Transit On Old Controller](#re-attach-spokes-to-transit-on-old-controller)
-      - [Attach VGW To Transit VPC](#attach-vgw-to-transit-vpc)
+      - [Reattach Spokes To Transit On Old Controller](#reattach-spokes-to-transit-on-old-controller)
+      - [Rettach VGW To Transit VPC](#rettach-vgw-to-transit-vpc)
+      - [Update VGW Route Propgation Settings](#update-vgw-route-propgation-settings-1)
       - [Delete Unused Resources](#delete-unused-resources)
 
 ## Deploy 7.2 Controller
@@ -535,13 +536,17 @@ resource "aviatrix_fqdn" "fqdn_1" {
 
 - From the Aviatrix Controller UI, go to Multi-Cloud Transit > Setup > External Connections and re-add the VGW External Connection.
 
-#### Re-attach Spokes To Transit On Old Controller
+#### Reattach Spokes To Transit On Old Controller
 
 - From the Aviatrix Controller UI, go to Multi-Cloud Transit > Setup > Attach/Detach, specify the appropriate spoke and transit gateways and click Attach.
 
-#### Attach VGW To Transit VPC
+#### Rettach VGW To Transit VPC
 
 - From the AWS Management Console, attach the VGW to the transit VPC.
+
+#### Update VGW Route Propgation Settings
+
+- After detaching and reattaching the VGW, VGW route propagation will be set to No. From the AWS Management Console, re-enable route propagation by setting it back to Yes for any route tables that previously had it enabled.
 
 #### Delete Unused Resources
 
