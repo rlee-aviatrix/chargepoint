@@ -24,7 +24,7 @@ This document outlines the recommended process for migrating an existing Aviatri
       - [Detach Spokes From Transit On Old Controller](#detach-spokes-from-transit-on-old-controller)
       - [Attach Spokes To Transit On New Controller](#attach-spokes-to-transit-on-new-controller)
       - [Remove VGW External Connection On Old Controller](#remove-vgw-external-connection-on-old-controller)
-      - [Detach VGW From Transit VPC On Old Controller](#detach-vgw-from-transit-vpc-on-old-controller)
+      - [Detach VGW From Transit VPC](#detach-vgw-from-transit-vpc)
       - [Add VGW External Connection On New Controller](#add-vgw-external-connection-on-new-controller)
       - [Reattach VGW To Transit VPC](#reattach-vgw-to-transit-vpc)
       - [Update VGW Route Propgation Settings](#update-vgw-route-propgation-settings)
@@ -49,7 +49,7 @@ This document outlines the recommended process for migrating an existing Aviatri
       - [Re-enable Gateway Single AZ HA](#re-enable-gateway-single-az-ha)
       - [Validate Default Routes](#validate-default-routes)
     - [Rollback Spoke And Transit Gateways](#rollback-spoke-and-transit-gateways)
-      - [Detach VGW From Transit VPC](#detach-vgw-from-transit-vpc)
+      - [Detach VGW From Transit VPC](#detach-vgw-from-transit-vpc-1)
       - [Remove VGW External Connection On New Controller](#remove-vgw-external-connection-on-new-controller)
       - [Detach Spokes From Transit On New Controller](#detach-spokes-from-transit-on-new-controller)
       - [Add VGW External Connection On Old Controller](#add-vgw-external-connection-on-old-controller)
@@ -285,7 +285,7 @@ resource "aviatrix_spoke_transit_attachment" "spoke_transit_attachment_2" {
 
 - From the Aviatrix Controller UI, go to Multi-Cloud Transit > Setup > External Connection, go to Disconnect AWS VGW, select the appropriate VGW and click Detach.
 
-#### Detach VGW From Transit VPC On Old Controller
+#### Detach VGW From Transit VPC
 
 - From the AWS Management Console, detach the VGW from the transit VPC.
 
