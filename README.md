@@ -27,7 +27,7 @@ This document outlines the recommended process for migrating an existing Aviatri
       - [Detach VGW From Transit VPC](#detach-vgw-from-transit-vpc)
       - [Add VGW External Connection On New Controller](#add-vgw-external-connection-on-new-controller)
       - [Reattach VGW To Transit VPC](#reattach-vgw-to-transit-vpc)
-      - [Update VGW Route Propgation Settings](#update-vgw-route-propgation-settings)
+      - [Update VGW Route Propagation Settings](#update-vgw-route-propagation-settings)
       - [Post-Migration Verification](#post-migration-verification)
     - [Egress Gateway Migration](#egress-gateway-migration)
       - [Disable Gateway Single AZ HA](#disable-gateway-single-az-ha)
@@ -55,7 +55,7 @@ This document outlines the recommended process for migrating an existing Aviatri
       - [Add VGW External Connection On Old Controller](#add-vgw-external-connection-on-old-controller)
       - [Reattach Spokes To Transit On Old Controller](#reattach-spokes-to-transit-on-old-controller)
       - [Rettach VGW To Transit VPC](#rettach-vgw-to-transit-vpc)
-      - [Update VGW Route Propgation Settings](#update-vgw-route-propgation-settings-1)
+      - [Update VGW Route Propagation Settings](#update-vgw-route-propagation-settings-1)
       - [Delete Unused Resources](#delete-unused-resources)
 
 ## Deploy 7.2 Controller
@@ -313,7 +313,7 @@ resource "aviatrix_vgw_conn" "vgw_conn_3" {
 
 - From the AWS Management Console, reattach the VGW to the transit VPC.
 
-#### Update VGW Route Propgation Settings
+#### Update VGW Route Propagation Settings
 
 - After detaching and reattaching the VGW, VGW route propagation will be set to No. From the AWS Management Console, re-enable route propagation by setting it back to Yes for any route tables that previously had it enabled.
 
@@ -544,7 +544,7 @@ resource "aviatrix_fqdn" "fqdn_1" {
 
 - From the AWS Management Console, attach the VGW to the transit VPC.
 
-#### Update VGW Route Propgation Settings
+#### Update VGW Route Propagation Settings
 
 - After detaching and reattaching the VGW, VGW route propagation will be set to No. From the AWS Management Console, re-enable route propagation by setting it back to Yes for any route tables that previously had it enabled.
 
